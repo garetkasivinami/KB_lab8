@@ -1,0 +1,111 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Нанесення водяних знаків на зображення</h1>
+    <p class="lead">Шота шота.</p>
+</div>
+
+@using (Html.BeginForm("WaterMarkImage", "Home", FormMethod.Post, new { role = "form", @enctype = "multipart/form-data" }))
+{
+    <fieldset>
+        <h4>Оберіть зображення для нанесення водяного знака</h4>
+        <input type="file" name="fileToUpload" id="fileToUpload" class="image_picker" />
+        <img alt="No image."/>
+    </fieldset>
+    <fieldset>
+        <h4>Оберіть водяний знак або....</h4>
+        <input type="file" name="waterMark" id="waterMark" class="image_picker" />
+        <img alt="No image." />
+    </fieldset>
+    <fieldset>
+        <p>
+            <h4>Введіть текст для генерації водяного знака:</h4>
+            <input type="text" name="watermarkText" id="watermarkText" />
+        </p>
+        <p>
+            <label>Розмір шрифта:</label>
+            <input type="number" name="fontSize" id="fontSize" min="10" max="100" value="30"/>px.
+        </p>
+        <button type="button" id="previewButton">Попередній перегляд</button>
+    </fieldset>
+    <div>
+        <button type="button" id="parametersButton">Додаткові параметри</button>
+        <fieldset class="hidden">
+            <p>
+                <label><b>Відступи:</b></label>
+                <label>x:</label>
+                <input type="number" name="offsetX" value="20" min="0"/>
+                <label> y:</label>
+                <input type="number" name="offsetY" value="20" min="0"/>
+            </p>
+            <p>
+                <label><b>Прозорість:</b></label>
+                <input type="range" name="opacity" value="50" min="0" max="100" oninput="this.nextElementSibling.value = parseInt(this.value) / 100" />
+                <output>0.5</output>
+            </p>
+        </fieldset>
+    </div>
+    <button type="submit" class="aggresiveButton">Нанести водяний знак!</button>
+}
+
+@if (ViewBag.ImgName != null)
+{
+    <div>
+        <img src="~/Img/Watermark/@ViewBag.ImgName" width="800" />
+    </div>
+}
+
+<script>
+    let imagePathInput = document.querySelectorAll(".image_picker");
+
+    for (let i = 0; i < imagePathInput.length; i++) {
+        let element = imagePathInput[i];
+        let parent = element.parentElement;
+        let child = parent.children[2];
+        element.addEventListener("change", function () {
+            child.src = window.URL.createObjectURL(element.files[0]);
+        });
+    }
+
+    let previewButton = document.querySelector("#previewButton");
+    let watermarkText = document.querySelector("#watermarkText");
+    let fontSize = document.querySelector("#fontSize");
+    previewButton.addEventListener("click", function () {
+        window.open("Preview/?fontSize=" + fontSize.value + "&text=" + watermarkText.value, "_blank");
+    });
+
+    let parametersButton = document.querySelector("#parametersButton");
+    let elementAfterParametersButton = parametersButton.parentElement.children[1];
+    parametersButton.addEventListener('click', function () {
+        elementAfterParametersButton.classList.toggle("hidden");
+    });
+</script>
+
+<style>
+    .hidden{
+        display: none;
+    }
+
+    fieldset{
+        max-width: 100%;
+        border-bottom: 1px solid gray;
+        margin: 10px 0;
+    }
+
+    .image_picker + img{
+        max-width: 100%;
+        margin: 10px 0;
+    }
+    fieldset > input {
+        margin: 15px 0;
+    }
+    .aggresiveButton {
+        padding: 10px;
+        background-color: #eeeeee;
+        border: 1px solid black;
+        font-size: 24px;
+        margin: 5px 0;
+    }
+</style>
