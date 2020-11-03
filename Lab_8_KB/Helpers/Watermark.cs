@@ -281,7 +281,7 @@ namespace Lab_8_KB.Helpers
     }
 
     public static class ImageGenerator {
-        private static string fontFamily = "Arial";
+        private static string fontFamily = FontFamily.GenericSerif.Name;
         private static Color DefaultFontColor { get; set; } = Color.Black;
 
         public static Bitmap GetTextWatermark(string text, int fontSize, Color? fontColor = null)
