@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 using System.Linq;
 using System.Web;
 using System.Web.ModelBinding;
@@ -18,6 +19,7 @@ namespace Lab_8_KB.Models
         public int marginX { get; set; } = 0;
         public int marginY { get; set; } = 0;
         public int opacity { get; set; } = 50;
+        public string textColor { get; set; }
         [BindNever]
         public string imgName { get; set; }
     }

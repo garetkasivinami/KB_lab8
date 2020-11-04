@@ -19,21 +19,23 @@ namespace Lab_8_KB.Controllers
             return View(model);
         }
 
-        public ActionResult Preview(string text, int? fontSize)
+        public ActionResult Preview(string text, string textColor, int? fontSize)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
                 text = "I`m null text";
             }
-            if (Cache.Contains($"{text}_img"))
-                return new FileContentResult(Cache.Get<byte[]>($"{text}_img_{fontSize}"), ".png");
+            var key = $"{text}_img_{fontSize}_{textColor}";
+            if (Cache.Contains(key))
+                return new FileContentResult(Cache.Get<byte[]>(key), ".png");
 
-            var image = ImageGenerator.GetTextWatermark(text, fontSize ?? 30, Color.White);
+            var parsedColor = ColorTranslator.FromHtml($"#{textColor}");
+            var image = ImageGenerator.GetTextWatermark(text, fontSize ?? 30, parsedColor, true);
             using (MemoryStream ms = new MemoryStream())
             {
                 image.Save(ms, ImageFormat.Bmp);
                 var bytes = ms.ToArray();
-                Cache.Add($"{text}_img_{fontSize}", bytes);
+                Cache.Add($"{text}_img_{fontSize}_{textColor}", bytes);
                 return new FileContentResult(bytes, ".png");
             }
         }
@@ -60,7 +62,8 @@ namespace Lab_8_KB.Controllers
                     watermarkImage = Image.FromStream(model.waterMark.InputStream, true, false);
                 } else if (model.watermarkText != null)
                 {
-                    watermarkImage = ImageGenerator.GetTextWatermark(model.watermarkText, model.fontSize);
+                    var color = ColorTranslator.FromHtml(model.textColor);
+                    watermarkImage = ImageGenerator.GetTextWatermark(model.watermarkText, model.fontSize, color);
                     objWatermarker.OffsetBetweenWatermarksScale = new Size(2, 3);
                 }
                 else
@@ -79,6 +82,10 @@ namespace Lab_8_KB.Controllers
 
                 objWatermarker.Image.Save(saveImagePath, objWatermarker.Image.RawFormat);
                 model.imgName = myfile;
+
+                model.fileToUpload = null;
+                model.waterMark = null;
+
                 return RedirectToAction("Index", model);
             }
         }

@@ -1,13 +1,12 @@
 ﻿@model Lab_8_KB.Models.UploadImageModel
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Нанесення водяних знаків";
 }
 
 <div class="jumbotron">
     <h1>Нанесення водяних знаків на зображення</h1>
-    <p class="lead">Шота шота.</p>
+    <p class="lead">Все безкоштовно.</p>
 </div>
-
 @using (Html.BeginForm("WaterMarkImage", "Home", FormMethod.Post, new { role = "form", @enctype = "multipart/form-data" }))
 {
     <div class="fieldContainer">
@@ -41,7 +40,10 @@
             <p>
                 <label>Розмір шрифта:</label>
                 <input type="number" name="fontSize" id="fontSize" min="10" max="100" value="@Model.fontSize" />px.
-
+            </p>
+            <p>
+                <label><b>Колір текста:</b></label>
+                <input type="color" name="textColor" value="@Model.textColor" id="textColor" />
             </p>
 
             <button type="button" id="previewButton">Попередній перегляд</button>
@@ -70,7 +72,7 @@
             <p>
                 <label><b>Прозорість:</b></label>
                 <input type="range" name="opacity" value="@Model.opacity" min="0" max="100" oninput="this.nextElementSibling.value = parseInt(this.value) / 100" />
-                <output>0.5</output>
+                <output>@(Model.opacity / 100f)</output>
             </p>
         </fieldset>
     </div>
@@ -98,9 +100,10 @@
 
     let previewButton = document.querySelector("#previewButton");
     let watermarkText = document.querySelector("#watermarkText");
+    let textColor = document.querySelector("#textColor");
     let fontSize = document.querySelector("#fontSize");
     previewButton.addEventListener("click", function () {
-        window.open("Preview/?fontSize=" + fontSize.value + "&text=" + watermarkText.value, "_blank");
+        window.open("Preview/?fontSize=" + fontSize.value + "&textColor=" + textColor.value.slice(1) + "&text=" + watermarkText.value, "_blank");
     });
 
     let parametersButtons = document.querySelectorAll(".parametersButton");
