@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Lab_8_KB.Models.UploadImageModel
+@{
     ViewBag.Title = "Home Page";
 }
 
@@ -9,40 +10,66 @@
 
 @using (Html.BeginForm("WaterMarkImage", "Home", FormMethod.Post, new { role = "form", @enctype = "multipart/form-data" }))
 {
-    <fieldset>
-        <h4>Оберіть зображення для нанесення водяного знака</h4>
-        <input type="file" name="fileToUpload" id="fileToUpload" class="image_picker" />
-        <img alt="No image."/>
-    </fieldset>
-    <fieldset>
-        <h4>Оберіть водяний знак або....</h4>
-        <input type="file" name="waterMark" id="waterMark" class="image_picker" />
-        <img alt="No image." />
-    </fieldset>
-    <fieldset>
-        <p>
-            <h4>Введіть текст для генерації водяного знака:</h4>
-            <input type="text" name="watermarkText" id="watermarkText" />
-        </p>
-        <p>
-            <label>Розмір шрифта:</label>
-            <input type="number" name="fontSize" id="fontSize" min="10" max="100" value="30"/>px.
-        </p>
-        <button type="button" id="previewButton">Попередній перегляд</button>
-    </fieldset>
-    <div>
-        <button type="button" id="parametersButton">Додаткові параметри</button>
+    <div class="fieldContainer">
+        <fieldset>
+            <h4>Оберіть зображення для нанесення водяного знака</h4>
+            <div class="fieldContainer">
+                <button type="button" class="parametersButton">Приховати зображення</button>
+                <fieldset>
+                    <p>Обране зображення:</p>
+                    <input type="file" name="fileToUpload" id="fileToUpload" class="image_picker" />
+                    <img alt="No image." />
+                </fieldset>
+            </div>
+        </fieldset>
+    </div>
+    <div class="fieldContainer">
+        <button type="button" class="parametersButton">Нанесення водяного зображення</button>
         <fieldset class="hidden">
+            <h4>Оберіть водяний знак або....</h4>
+            <input type="file" name="waterMark" id="waterMark" class="image_picker" />
+            <img alt="No image." />
+        </fieldset>
+    </div>
+    <div class="fieldContainer">
+        <button type="button" class="parametersButton">Нанесення текста</button>
+        <fieldset class="@(string.IsNullOrWhiteSpace(Model.watermarkText) ? "hidden": "")">
             <p>
-                <label><b>Відступи:</b></label>
+                <h4>Введіть текст для генерації водяного знака:</h4>
+                <input type="text" name="watermarkText" id="watermarkText" value="@Model.watermarkText" />
+            </p>
+            <p>
+                <label>Розмір шрифта:</label>
+                <input type="number" name="fontSize" id="fontSize" min="10" max="100" value="@Model.fontSize" />px.
+
+            </p>
+
+            <button type="button" id="previewButton">Попередній перегляд</button>
+
+        </fieldset>
+
+    </div>
+
+    <div class="fieldContainer">
+        <button type="button" class="parametersButton">Додаткові параметри</button>
+        <fieldset class="hidden additional">
+            <p>
+                <label><b>Відступи від краю поля:</b></label>
                 <label>x:</label>
-                <input type="number" name="offsetX" value="20" min="0"/>
+                <input type="number" name="offsetX" value="@Model.offsetX" />
                 <label> y:</label>
-                <input type="number" name="offsetY" value="20" min="0"/>
+                <input type="number" name="offsetY" value="@Model.offsetY" />
+            </p>
+            <p>
+                <label><b>Відступи між водяними знаками:</b></label>
+                <label>x:</label>
+                <input type="number" name="marginX" value="@Model.marginX" min="0" />
+                <label> y:</label>
+                <input type="number" name="marginY" value="@Model.marginY" min="0" />
             </p>
             <p>
                 <label><b>Прозорість:</b></label>
-                <input type="range" name="opacity" value="50" min="0" max="100" oninput="this.nextElementSibling.value = parseInt(this.value) / 100" />
+                <input type="range" name="opacity" value="@Model.opacity" min="0" max="100" oninput="this.nextElementSibling.value = parseInt(this.value) / 100" />
                 <output>0.5</output>
             </p>
         </fieldset>
@@ -50,10 +77,10 @@
     <button type="submit" class="aggresiveButton">Нанести водяний знак!</button>
 }
 
-@if (ViewBag.ImgName != null)
+@if (Model.imgName != null)
 {
     <div>
-        <img src="~/Img/Watermark/@ViewBag.ImgName" width="800" />
+        <img src="~/Img/Watermark/@Model.imgName" width="800" />
     </div>
 }
 
@@ -76,36 +103,52 @@
         window.open("Preview/?fontSize=" + fontSize.value + "&text=" + watermarkText.value, "_blank");
     });
 
-    let parametersButton = document.querySelector("#parametersButton");
-    let elementAfterParametersButton = parametersButton.parentElement.children[1];
-    parametersButton.addEventListener('click', function () {
-        elementAfterParametersButton.classList.toggle("hidden");
-    });
+    let parametersButtons = document.querySelectorAll(".parametersButton");
+    for (let i = 0; i < parametersButtons.length; i++) {
+        let element = parametersButtons[i];
+        let elementAfterParametersButton = element.parentElement.children[1];
+        element.addEventListener('click', function () {
+            elementAfterParametersButton.classList.toggle("hidden");
+        });
+    }
 </script>
 
 <style>
-    .hidden{
+    .hidden {
         display: none;
     }
 
-    fieldset{
+    fieldset {
         max-width: 100%;
-        border-bottom: 1px solid gray;
         margin: 10px 0;
     }
 
-    .image_picker + img{
+    .image_picker + img {
         max-width: 100%;
         margin: 10px 0;
     }
+
     fieldset > input {
         margin: 15px 0;
     }
+
     .aggresiveButton {
         padding: 10px;
         background-color: #eeeeee;
         border: 1px solid black;
         font-size: 24px;
         margin: 5px 0;
+    }
+
+    .additional {
+        border: 1px solid grey;
+        background-color: #eeeeee;
+        padding: 10px;
+    }
+
+    .fieldContainer {
+        border: 3px double #aaaaaa;
+        padding: 5px;
+        margin-bottom: 5px;
     }
 </style>

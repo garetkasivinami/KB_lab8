@@ -14,10 +14,9 @@ namespace Lab_8_KB.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index(string imgName)
+        public ActionResult Index(UploadImageModel model)
         {
-            ViewBag.ImgName = imgName;
-            return View();
+            return View(model);
         }
 
         public ActionResult Preview(string text, int? fontSize)
@@ -44,13 +43,13 @@ namespace Lab_8_KB.Controllers
             var fileToUpload = model.fileToUpload;
             if (model.fileToUpload == null)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", model);
             }
             using (Image image = Image.FromStream(fileToUpload.InputStream, true, false))
             {
                 string name = Path.GetFileNameWithoutExtension(fileToUpload.FileName);
                 var ext = Path.GetExtension(fileToUpload.FileName);
-                string myfile = name + ext;
+                string myfile = DateTime.Now.Ticks.ToString() + ext;
                 var saveImagePath = Path.Combine(Server.MapPath("~/Img/Watermark"), myfile);
 
                 var objWatermarker = new Watermark(image);
@@ -70,7 +69,8 @@ namespace Lab_8_KB.Controllers
                 }
 
                 objWatermarker.Position = WatermarkPosition.Absolute;
-                objWatermarker.Margin = new Padding(model.offsetX, model.offsetY, model.offsetX, model.offsetY);
+                objWatermarker.Margin = new Size(model.marginX, model.marginY);
+                objWatermarker.Offset = new Size(model.offsetX, model.offsetY);
                 objWatermarker.Opacity = model.opacity / 100f;
                 objWatermarker.TransparentColor = Color.White;
                 objWatermarker.ScaleRatio = 1;
@@ -78,7 +78,8 @@ namespace Lab_8_KB.Controllers
                 objWatermarker.DrawImage(watermarkImage);
 
                 objWatermarker.Image.Save(saveImagePath, objWatermarker.Image.RawFormat);
-                return RedirectToAction("Index", new { imgName = myfile });
+                model.imgName = myfile;
+                return RedirectToAction("Index", model);
             }
         }
     }
