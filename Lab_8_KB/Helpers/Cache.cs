@@ -26,5 +26,16 @@ namespace Lab_8_KB.Helpers
 
             return null;
         }
+
+        public static T GetOrCreate<T>(string key, Func<T> createFunc) where T: class
+        {
+            var obj = Get<T>(key);
+            if (obj == null)
+            {
+                obj = createFunc();
+                Add(key, obj);
+            }
+            return obj;
+        }
     }
 }

@@ -22,20 +22,14 @@ namespace Lab_8_KB.Controllers
         public ActionResult Preview(string text, string textColor, int? fontSize)
         {
             if (string.IsNullOrWhiteSpace(text))
-            {
                 text = "I`m null text";
-            }
-            var key = $"{text}_img_{fontSize}_{textColor}";
-            if (Cache.Contains(key))
-                return new FileContentResult(Cache.Get<byte[]>(key), ".png");
-
+            
             var parsedColor = ColorTranslator.FromHtml($"#{textColor}");
             var image = ImageGenerator.GetTextWatermark(text, fontSize ?? 30, parsedColor, true);
             using (MemoryStream ms = new MemoryStream())
             {
                 image.Save(ms, ImageFormat.Bmp);
                 var bytes = ms.ToArray();
-                Cache.Add($"{text}_img_{fontSize}_{textColor}", bytes);
                 return new FileContentResult(bytes, ".png");
             }
         }
@@ -44,9 +38,8 @@ namespace Lab_8_KB.Controllers
         {
             var fileToUpload = model.fileToUpload;
             if (model.fileToUpload == null)
-            {
                 return RedirectToAction("Index", model);
-            }
+
             using (Image image = Image.FromStream(fileToUpload.InputStream, true, false))
             {
                 string name = Path.GetFileNameWithoutExtension(fileToUpload.FileName);
@@ -60,7 +53,8 @@ namespace Lab_8_KB.Controllers
                 if (model.waterMark != null)
                 {
                     watermarkImage = Image.FromStream(model.waterMark.InputStream, true, false);
-                } else if (model.watermarkText != null)
+                } 
+                else if (model.watermarkText != null)
                 {
                     var color = ColorTranslator.FromHtml(model.textColor);
                     watermarkImage = ImageGenerator.GetTextWatermark(model.watermarkText, model.fontSize, color);

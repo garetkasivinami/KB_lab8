@@ -43,65 +43,17 @@ namespace Lab_8_KB.Helpers
         #endregion
 
         #region Public Properties
-        /// <summary>
-        /// Gets the image with drawn watermarks
-        /// </summary>
-        [Browsable(false)]
         public Image Image { get { return m_image; } }
-
-        public Size OffsetBetweenWatermarksScale
-        {
-            get => offsetBetweenWatermarksScale;
-            set => offsetBetweenWatermarksScale = value;
-        }
-
-        /// <summary>
-        /// Watermark position relative to the image sizes. 
-        /// If Absolute is chosen, watermark positioning is being done via PositionX and PositionY 
-        /// properties (0 by default)\n
-        /// </summary>        
+        public Size OffsetBetweenWatermarksScale { get => offsetBetweenWatermarksScale; set => offsetBetweenWatermarksScale = value; }  
         public WatermarkPosition Position { get { return m_position; } set { m_position = value; } }
-
-        public Size Offset
-        {
-            get => offset;
-            set => offset = value;
-        }
-        /// <summary>
-        /// Watermark X coordinate (works if Position property is set to WatermarkPosition.Absolute)
-        /// </summary>
+        public Size Offset { get => offset; set => offset = value; }
         public int PositionX { get { return m_x; } set { m_x = value; } }
-
-        /// <summary>
-        /// Watermark Y coordinate (works if Position property is set to WatermarkPosition.Absolute)
-        /// </summary>
         public int PositionY { get { return m_y; } set { m_y = value; } }
-
-        /// <summary>
-        /// Watermark opacity. Can have values from 0.0 to 1.0
-        /// </summary>
         public float Opacity { get { return m_opacity; } set { m_opacity = value; } }
-
-        /// <summary>
-        /// Transparent color
-        /// </summary>
         public Color TransparentColor { get { return m_transparentColor; } set { m_transparentColor = value; } }
-
-        /// <summary>
-        /// Watermark rotation and flipping
-        /// </summary>
         public RotateFlipType RotateFlip { get { return m_rotateFlip; } set { m_rotateFlip = value; } }
-
-        /// <summary>
-        /// Spacing between watermark and image edges
-        /// </summary>
         public Size Margin { get { return margin; } set { margin = value; } }
-
-        /// <summary>
-        /// Watermark scaling ratio. Must be greater than 0. Only for image watermarks
-        /// </summary>
         public float ScaleRatio { get { return m_scaleRatio; } set { m_scaleRatio = value; } }
-
         #endregion
 
         #region Constructors
@@ -117,9 +69,6 @@ namespace Lab_8_KB.Helpers
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Resets image, clearing all drawn watermarks
-        /// </summary>
         public void ResetImage()
         {
             m_image = new Bitmap(m_originalImage);
@@ -142,13 +91,11 @@ namespace Lab_8_KB.Helpers
             if (m_scaleRatio <= 0)
                 throw new ArgumentOutOfRangeException("ScaleRatio");
 
-            // Creates a new watermark with margins (if margins are not specified returns the original watermark)
             m_watermark = GetWatermarkImage(watermark);
 
-            // Rotates and/or flips the watermark
             m_watermark.RotateFlip(m_rotateFlip);
 
-            ColorMatrix colorMatrix = new ColorMatrix(
+            var colorMatrix = new ColorMatrix(
                 new float[][] {
                     new float[] { 1, 0f, 0f, 0f, 0f},
                     new float[] { 0f, 1, 0f, 0f, 0f},
@@ -157,19 +104,16 @@ namespace Lab_8_KB.Helpers
                     new float[] { 0f, 0f, 0f, 0f, 1}
                 });
 
-            ImageAttributes attributes = new ImageAttributes();
+            var attributes = new ImageAttributes();
 
-            // Set the opacity of the watermark
             attributes.SetColorMatrix(colorMatrix);
 
-            // Set the transparent color 
             if (m_transparentColor != Color.Empty)
             {
                 attributes.SetColorKey(m_transparentColor, m_transparentColor);
             }
 
-            // Draw the watermark
-            using (Graphics gr = Graphics.FromImage(m_image))
+            using (var gr = Graphics.FromImage(m_image))
             {
                 for (int i = offset.Height - margin.Height; i < Image.Height; i++)
                 {
@@ -179,20 +123,14 @@ namespace Lab_8_KB.Helpers
                         PositionX = j;
                         PositionY = i;
 
-                        // Calculate watermark position
-                        Point waterPos = GetWatermarkPosition();
-                        // Watermark destination rectangle
-                        Rectangle destRect = new Rectangle(waterPos.X, waterPos.Y, m_watermark.Width, m_watermark.Height);
+                        var waterPos = GetWatermarkPosition();
+                        var destRect = new Rectangle(waterPos.X, waterPos.Y, m_watermark.Width, m_watermark.Height);
 
-                        // Set the properties for the log
-                        // Draw the logo
                         gr.DrawImage(m_watermark, destRect, 0, 0, m_watermark.Width, m_watermark.Height, GraphicsUnit.Pixel, attributes);
-                        //Draw the Text
-                        //objWatermarker.DrawText("WaterMarkDemo")
 
-                        j = j + m_watermark.Width;// watermark image width 
+                        j = j + m_watermark.Width;
                     }
-                    i = i + m_watermark.Height;//
+                    i = i + m_watermark.Height;
                 }
                 
             }
@@ -200,7 +138,6 @@ namespace Lab_8_KB.Helpers
 
         public void DrawText(string text, int fontSize)
         {
-            // Convert text to image, so we can use opacity etc.
             Image textWatermark = ImageGenerator.GetTextWatermark(text, fontSize);
 
             DrawImage(textWatermark);
@@ -217,18 +154,16 @@ namespace Lab_8_KB.Helpers
         private Image GetWatermarkImage(Image watermark)
         {
 
-            // If there are no margins specified and scale ration is 1, no need to create a new bitmap
             if (margin.Width == 0 && margin.Height == 0 && m_scaleRatio == 1.0f)
                 return watermark;
 
-            // Create a new bitmap with new sizes (size + margins) and draw the watermark
             int newWidth = Convert.ToInt32(watermark.Width * m_scaleRatio);
             int newHeight = Convert.ToInt32(watermark.Height * m_scaleRatio);
 
-            Rectangle sourceRect = new Rectangle(margin.Width, margin.Height, newWidth, newHeight);
-            Rectangle destRect = new Rectangle(0, 0, watermark.Width, watermark.Height);
+            var sourceRect = new Rectangle(margin.Width, margin.Height, newWidth, newHeight);
+            var destRect = new Rectangle(0, 0, watermark.Width, watermark.Height);
 
-            Bitmap bitmap = new Bitmap(newWidth + margin.Width, newHeight + margin.Height);
+            var bitmap = new Bitmap(newWidth + margin.Width, newHeight + margin.Height);
             bitmap.SetResolution(watermark.HorizontalResolution, watermark.VerticalResolution);
 
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -285,30 +220,5 @@ namespace Lab_8_KB.Helpers
         #endregion
 
     }
-
-    public static class ImageGenerator {
-        private static string fontFamily = FontFamily.GenericSerif.Name;
-        private static Color DefaultFontColor { get; set; } = Color.Black;
-        private static Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
-        private static Color fillColor = Color.FromArgb(128,128,128);
-
-        public static Bitmap GetTextWatermark(string text, int fontSize, Color? fontColor = null, bool preview = false)
-        {
-            var font = new Font(fontFamily, fontSize);
-            var _fontColor = fontColor ?? DefaultFontColor;
-            Brush brush = new SolidBrush(_fontColor);
-            SizeF size = graphics.MeasureString(text, font);
-            Bitmap bitmap = new Bitmap((int)size.Width, (int)size.Height, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                if (preview)
-                    g.Clear(fillColor);
-
-                g.DrawString(text, font, brush, 0, 0);
-                return bitmap;
-            }
-        }
-    }
-
     #endregion
 }
